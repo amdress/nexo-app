@@ -1,13 +1,19 @@
-// App.tsx completo y corregido
+// App.tsx completo e corrigido
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AnimatedSplash from "@/layouts/AnimatedSplash";
-import NavigationProvider from "@/navigation"; 
+import NavigationProvider from "@/navigation";
 import { ToastProvider } from "@/shared/context/ToastContext";
-import { ThemeProvider } from "@/shared/context/ThemeContext"; 
+import { ThemeProvider, useTheme } from "@/shared/context/ThemeContext";
 import { runMigrations } from "@/database/migrations";
 import { initializeLanguage } from "@/shared/config/i18n";
+
+/** Conecta o StatusBar ao ThemeContext da própria app, em vez do tema do sistema operacional */
+function ThemedStatusBar() {
+  const { isDarkMode } = useTheme();
+  return <StatusBar style={isDarkMode ? "light" : "dark"} />;
+}
 
 export default function App() {
   const [isSystemReady, setIsSystemReady] = useState(false);
@@ -28,14 +34,14 @@ export default function App() {
     bootstrapApp();
   }, []);
 
-  // Modificado: Envolvemos el estado de carga en el ThemeProvider
-  // para evitar que cualquier inicialización temprana rompa el contexto.
   if (!isSystemReady || !isAnimationDone) {
     return (
-      <ThemeProvider>
-        <AnimatedSplash onAnimationComplete={() => setIsAnimationDone(true)} />
-        <StatusBar style="dark" /> 
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AnimatedSplash onAnimationComplete={() => setIsAnimationDone(true)} />
+          <ThemedStatusBar />
+        </ThemeProvider>
+      </SafeAreaProvider>
     );
   }
 
@@ -44,7 +50,7 @@ export default function App() {
       <ThemeProvider>
         <ToastProvider>
           <NavigationProvider />
-          <StatusBar style="auto" />
+          <ThemedStatusBar />
         </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
