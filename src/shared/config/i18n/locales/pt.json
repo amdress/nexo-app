@@ -1,0 +1,23 @@
+{
+    "common": {
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "close": "Fechar",
+        "loading": "Carregando...",
+        "error": "Erro",
+        "success": "Sucesso"
+    },
+    "tabs": {
+        "daily": "Jornadas",
+        "staff": "Equipe",
+        "reports": "Relatórios",
+        "settings": "Ajustes"
+    },
+    "settings": {
+        "general_config": "Preferências"
+    },
+    "preferences": {
+    "language_label": "Idioma do Aplicativo",
+    "select_language": "Selecione o Idioma"
+  }
+}

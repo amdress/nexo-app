@@ -1,0 +1,15 @@
+{
+    "preferences": {
+    "language_label": "Idioma de la  Aplicacion",
+    "select_language": "Selecione el Idioma"
+  },
+    "settings": {
+        "general_config": "Preferencias"
+    },
+   "tabs": {
+        "daily": "Diarias",
+        "staff": "Equipo",
+        "reports": "Relatórios",
+        "settings": "Ajustes"
+    }
+}
