@@ -15,6 +15,7 @@ function mapStaffEntityToUI(item: StaffEntity): StaffUI {
   return {
     id: item.id,
     name: item.name,
+    email: item.email,
     role: item.role,
     phone: item.phone,
     status: item.status,
