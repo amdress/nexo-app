@@ -11,6 +11,8 @@ import DailySummaryScreen from "../features/daily/screens/DailySummaryScreen";
 import StaffCreateScreen from "../features/staff/screens/StaffCreateScreen";
 import StaffProfileScreen from "../features/staff/screens/StaffProfileScreen";
 import GeneralPreferencesScreen from "../features/settings/screens/GeneralPreferencesScreen";
+import CompanyProfileScreen from "../features/settings/screens/CompanyProfileScreen";
+import ClientsListScreen from "../features/clients/screens/ClientsListScreen";
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
 
 // Se registran todas las rutas de la app en un solo lugar, para tener un control centralizado y evitar duplicaciones.
@@ -21,7 +23,9 @@ export type RootStackParamList = {
   DailySummary: undefined;
   StaffCreate: undefined;
   StaffProfile: { staffId: string };
-  GeneralPreferences: undefined; 
+  GeneralPreferences: undefined;
+  CompanyProfile: undefined;
+  ClientsList: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +50,8 @@ export default function AppNavigation() {
       <Stack.Screen name="StaffCreate" component={StaffCreateScreen} />
       <Stack.Screen name="StaffProfile" component={StaffProfileScreen} />
       <Stack.Screen name="GeneralPreferences" component={GeneralPreferencesScreen} />
+      <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} />
+      <Stack.Screen name="ClientsList" component={ClientsListScreen} />
     </Stack.Navigator>
   );
 }

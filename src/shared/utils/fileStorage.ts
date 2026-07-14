@@ -3,6 +3,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 const SIGNATURES_DIR = `${FileSystem.documentDirectory}signatures/`;
 const PHOTOS_DIR = `${FileSystem.documentDirectory}staff_photos/`;
+const COMPANY_DIR = `${FileSystem.documentDirectory}company/`;
+const CLIENTS_DIR = `${FileSystem.documentDirectory}clients/`;
 
 async function ensureDirExists(dirUri: string): Promise<void> {
   const dirInfo = await FileSystem.getInfoAsync(dirUri);
@@ -40,6 +42,43 @@ export async function savePhotoFile(
   await ensureDirExists(PHOTOS_DIR);
 
   const fileUri = `${PHOTOS_DIR}${dailyId}_${staffId}.jpg`;
+
+  await FileSystem.copyAsync({
+    from: temporaryUri,
+    to: fileUri,
+  });
+
+  return fileUri;
+}
+
+/** Salva o logo da empresa contratista, copiando da galeria para um local persistente */
+export async function saveCompanyLogo(temporaryUri: string): Promise<string> {
+  await ensureDirExists(COMPANY_DIR);
+
+  // Nome fixo: sempre existe UM único logo da empresa, então sobrescreve sempre que trocar
+  const fileUri = `${COMPANY_DIR}logo.jpg`;
+
+  await FileSystem.copyAsync({
+    from: temporaryUri,
+    to: fileUri,
+  });
+
+  return fileUri;
+}
+
+/** Salva o logo de uma empresa contratante, copiando da galeria para um local persistente */
+export async function saveClientLogo(clientName: string, temporaryUri: string): Promise<string> {
+  await ensureDirExists(CLIENTS_DIR);
+
+  // Sanitiza o nome para um identificador de arquivo seguro
+  const safeSlug = clientName
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .replace(/[^a-z0-9]+/g, '_')
+    .slice(0, 40);
+
+  const fileUri = `${CLIENTS_DIR}${safeSlug}_${Date.now()}.jpg`;
 
   await FileSystem.copyAsync({
     from: temporaryUri,

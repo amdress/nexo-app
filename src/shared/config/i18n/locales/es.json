@@ -4,12 +4,25 @@
     "select_language": "Selecione el Idioma"
   },
     "settings": {
-        "general_config": "Preferencias"
+        "general_config": "Preferencias",
+        "contracting_companies": "Empresas Contratantes",
+        "my_company" : "Mi Empresa"
     },
-   "tabs": {
-        "daily": "Diarias",
-        "staff": "Equipo",
+  "common": {
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "close": "Cerrar",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Sucesso"
+    },
+    "tabs": {
+        "daily": "Jornadas",
+        "staff": "Equipe",
         "reports": "Relatórios",
         "settings": "Ajustes"
+    },
+    "company": {
+        "profile_logo" :"Seleccione un Logo "
     }
 }
