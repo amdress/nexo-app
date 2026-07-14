@@ -15,7 +15,15 @@ export async function up(db: SQLiteDatabase): Promise<void> {
       created_at TEXT NOT NULL
     );
 
-    -- 2. TABLA: DAILY (Jornadas de Trabajo)
+    -- 2. TABLA: CLIENTS (Empresas Contratantes)
+    CREATE TABLE IF NOT EXISTS clients (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      logo_uri TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    -- 3. TABLA: DAILY (Jornadas de Trabajo)
     CREATE TABLE IF NOT EXISTS daily (
       id TEXT PRIMARY KEY NOT NULL,
       date TEXT NOT NULL,
@@ -24,9 +32,12 @@ export async function up(db: SQLiteDatabase): Promise<void> {
       required_staff_count INTEGER NOT NULL,
       description TEXT,
       status TEXT NOT NULL DEFAULT 'scheduled', -- 'scheduled', 'in_progress', 'completed'
-      created_at TEXT NOT NULL
+      client_id TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE SET NULL
     ); 
-    -- 3. TABLA PIVOTE: DAILY_STAFF (Asistencia / Control)
+
+    -- 4. TABLA PIVOTE: DAILY_STAFF (Asistencia / Control)
     CREATE TABLE IF NOT EXISTS daily_staff (
       id TEXT PRIMARY KEY NOT NULL,
       daily_id TEXT NOT NULL,
@@ -47,9 +58,11 @@ export async function up(db: SQLiteDatabase): Promise<void> {
       CONSTRAINT unique_daily_staff UNIQUE (daily_id, staff_id)
     );
 
-    -- 4. ÍNDICES DE OPTIMIZACIÓN (Para búsquedas rápidas)
+    -- 5. ÍNDICES DE OPTIMIZACIÓN (Para búsquedas rápidas)
     CREATE INDEX IF NOT EXISTS idx_staff_cpf ON staff(cpf);
-    CREATE INDEX IF NOT EXISTS idx_daily_date ON daily(date); 
+    CREATE INDEX IF NOT EXISTS idx_clients_name ON clients(name);
+    CREATE INDEX IF NOT EXISTS idx_daily_date ON daily(date);
+    CREATE INDEX IF NOT EXISTS idx_daily_client_id ON daily(client_id);
     CREATE INDEX IF NOT EXISTS idx_pivot_daily_id ON daily_staff(daily_id);
     CREATE INDEX IF NOT EXISTS idx_pivot_staff_id ON daily_staff(staff_id);
   `);
@@ -59,11 +72,14 @@ export async function down(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     DROP INDEX IF EXISTS idx_pivot_staff_id;
     DROP INDEX IF EXISTS idx_pivot_daily_id;
+    DROP INDEX IF EXISTS idx_daily_client_id;
     DROP INDEX IF EXISTS idx_daily_date;
+    DROP INDEX IF EXISTS idx_clients_name;
     DROP INDEX IF EXISTS idx_staff_cpf;
-    
+
     DROP TABLE IF EXISTS daily_staff;
     DROP TABLE IF EXISTS daily;
+    DROP TABLE IF EXISTS clients;
     DROP TABLE IF EXISTS staff;
   `);
 }

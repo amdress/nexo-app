@@ -14,10 +14,17 @@
         "settings": "Ajustes"
     },
     "settings": {
-        "general_config": "Preferências"
+        "general_config": "Preferências",
+        "contracting_companies": "Empresas Contratantes",
+        "my_company" : "Minha Empresa"
     },
     "preferences": {
     "language_label": "Idioma do Aplicativo",
     "select_language": "Selecione o Idioma"
-  }
+  },
+
+  "company": {
+        "profile_logo" :"Seleccione un Logo",
+        "name": "Nome da Empresa"
+    }
 }
