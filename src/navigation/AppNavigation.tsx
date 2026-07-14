@@ -21,7 +21,7 @@ export type RootStackParamList = {
   DailySummary: undefined;
   StaffCreate: undefined;
   StaffProfile: { staffId: string };
-  GeneralPreferences: undefined; // 🌟 Corregido y unificado con la navegación de origen
+  GeneralPreferences: undefined; 
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

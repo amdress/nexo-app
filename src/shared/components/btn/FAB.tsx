@@ -54,3 +54,4 @@ const getStyles = (COLORS: any) => StyleSheet.create({
     shadowRadius: 3.84,
   },
 });
+

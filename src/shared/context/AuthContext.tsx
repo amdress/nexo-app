@@ -1,34 +1,66 @@
 // src/shared/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthContextType } from './interfaces/auth';
+import { AuthContextType, UserProfile, UserRole } from '@/features/auth/interfaces/auth';
+import { AuthService } from '@/features/auth/services/authService';
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<'admin' | 'staff' | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 💡 Middleware Inicial: Aquí podrías leer un token de SecureStore o verificar la DB SQLite al arrancar
+  // 💡 Middleware Inicial de Restauração de Sessão
   useEffect(() => {
     async function checkSession() {
-      // Ex: const token = await SecureStore.getItemAsync('user_token');
-      // Si existe, actualizas los estados.
+      try {
+        const token = await AuthService.getStoredToken();
+        if (token) {
+          const [storedUser, storedRole] = await Promise.all([
+            AuthService.getStoredUser(),
+            AuthService.getStoredRole()
+          ]);
+          setUser(storedUser);
+          setUserRole(storedRole);
+        }
+      } catch (error) {
+        console.error('[AuthContext] Erro ao restaurar sessão inicial:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     checkSession();
   }, []);
 
-  const login = (role: 'admin' | 'staff') => {
-    setUserRole(role);
-    setIsAuthenticated(true);
+  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const session = await AuthService.login(email, password, role);
+      if (session) {
+        setUser(session.user);
+        setUserRole(session.role);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[AuthContext] Erro na ação de login:', error);
+      return false;
+    }
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUserRole(null);
+  const logout = async () => {
+    try {
+      await AuthService.logout();
+      setUser(null);
+      setUserRole(null);
+    } catch (error) {
+      console.error('[AuthContext] Erro ao deslogar:', error);
+    }
   };
+
+  const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, userRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
