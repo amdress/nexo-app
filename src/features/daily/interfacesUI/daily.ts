@@ -7,6 +7,8 @@ export interface DailyItem {
   requiredStaffCount: number;
   confirmedStaffCount: number;
   status: 'scheduled' | 'in_progress' | 'completed';
+  clientName: string | null;  
+  clientLogo: string | null;  
 }
 
 export interface StaffAttendance {

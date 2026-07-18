@@ -6,5 +6,7 @@ export interface DailyEntity {
   required_staff_count: number;
   description: string | null; // Es opcional en la BD
   status: 'scheduled' | 'in_progress' | 'completed';
+  client_id: string | null;
+  report_pdf_uri: string | null;
   created_at: string;
 }

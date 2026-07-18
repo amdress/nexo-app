@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-size: '20' # Versão estável do Node
+          node-version: '20' # Versão estável do Node
           cache: 'npm'    # Ativa cache automático para acelerar instalações futuras
 
       # 3. Instala as dependências do projeto de forma limpa

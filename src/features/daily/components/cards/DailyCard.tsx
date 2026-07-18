@@ -1,6 +1,6 @@
 // src/features/daily/components/DailyCard.tsx
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
 import { getStatusBadgeStyles } from "../../utils/dailyFormatter";
@@ -14,60 +14,86 @@ interface DailyCardProps {
 export default function DailyCard({ daily, onPress }: DailyCardProps) {
   const [styles, COLORS] = useThemedStyles(getStyles);
 
-  // Memorizamos el Badge para evitar recalcular innecesariamente y cumplir con el ciclo de vida
   const badge = useMemo(() => {
     return getStatusBadgeStyles(daily.status, COLORS);
   }, [daily.status, COLORS]);
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={onPress}>
-      <View style={styles.statusWrapper}>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: badge.bg, borderColor: badge.border },
-          ]}
-        >
-          <Text style={[styles.statusText, { color: badge.text }]}>
-            {badge.label}
-          </Text>
-        </View>
-      </View>
+    <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
+      
+      {/* Fila principal de contenido */}
+      <View style={styles.mainRow}>
+        
+        {/* Columna Izquierda: Identidad y Tiempos */}
+        <View style={styles.infoColumn}>
+          
+          {/* Bloque Cliente */}
+          <View style={styles.clientRow}>
+            {daily.clientLogo ? (
+              <Image 
+                source={{ uri: daily.clientLogo }} 
+                style={styles.clientAvatar} 
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.clientAvatarPlaceholder}>
+                <Ionicons name="business" size={14} color={COLORS.primary} />
+              </View>
+            )}
+            <Text style={styles.clientNameText} numberOfLines={1}>
+              {daily.clientName || "Empresa Não Informada"}
+            </Text>
+          </View>
 
-      <View style={styles.mainContentRow}>
-        <View style={styles.dateTimeColumn}>
-          <View style={styles.infoMeta}>
-            <Ionicons
-              name="calendar-outline"
-              size={15}
-              color={COLORS.primary}
-            />
-            <View style={styles.dateContainer}>
-              <Text style={styles.dayNameText}>{daily.dayName}</Text>
-              <Text style={styles.dateText}>{daily.dateLabel}</Text>
+          {/* Bloque Fecha y Horas */}
+          <View style={styles.metaDataGroup}>
+            <View style={styles.infoMeta}>
+              <Ionicons name="calendar-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.dateText}>
+                {daily.dayName}, <Text style={styles.dateLabelHighlight}>{daily.dateLabel}</Text>
+              </Text>
+            </View>
+
+            <View style={styles.infoMeta}>
+              <Ionicons name="time-outline" size={14} color={COLORS.textMuted} />
+              <Text style={styles.metaText}>{daily.timeRange}</Text>
             </View>
           </View>
 
-          <View style={styles.infoMeta}>
-            <Ionicons name="time-outline" size={15} color={COLORS.textMuted} />
-            <Text style={styles.metaText}>{daily.timeRange}</Text>
-          </View>
         </View>
 
-        <View style={styles.staffColumn}>
-          <View style={styles.staffHighlightMeta}>
-            <Ionicons name="people" size={18} color={COLORS.success} />
-            <Text style={styles.staffHighlightText}>
-              {`${daily.confirmedStaffCount}/${daily.requiredStaffCount}`}
-              <Text style={styles.staffLabelText}> Req.</Text>
+        {/* Columna Derecha: Estados y Contadores */}
+        <View style={styles.sideColumn}>
+          {/* Status Badge */}
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: badge.bg, borderColor: badge.border },
+            ]}
+          >
+            <Text style={[styles.statusText, { color: badge.text }]}>
+              {badge.label}
+            </Text>
+          </View>
+
+          {/* Contador de Staff Compacto */}
+          <View style={styles.staffCounterBadge}>
+            <Ionicons name="people" size={15} color={COLORS.success} />
+            <Text style={styles.staffCountText}>
+              {daily.confirmedStaffCount}
+              <Text style={styles.staffCountTotal}>/{daily.requiredStaffCount}</Text>
             </Text>
           </View>
         </View>
+
       </View>
 
+      {/* Footer: Descripción Opcional */}
       {daily.description ? (
         <View style={styles.descriptionWrapper}>
-          <Text style={styles.descriptionText}>{`"${daily.description}"`}</Text>
+          <Text style={styles.descriptionText} numberOfLines={2}>
+            {daily.description}
+          </Text>
         </View>
       ) : null}
     </TouchableOpacity>
@@ -77,101 +103,124 @@ export default function DailyCard({ daily, onPress }: DailyCardProps) {
 const getStyles = (COLORS: any) => StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  statusWrapper: {
+  mainRow: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: 8,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  mainContentRow: {
-    flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
-    gap: 16,
-  },
-  staffColumn: {
-    flex: 1, 
-    justifyContent: 'center',
-  },
-  staffHighlightMeta: {
-    flexDirection: 'row',      
-    alignItems: 'center',      
-    justifyContent: 'space-evenly',    
-    backgroundColor: COLORS.background, 
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 15,
-    gap: 10,                     
-    width: '100%',
-    height: 80,
-  },
-  staffHighlightText: {
-    color: COLORS.success,
-    fontSize: 25,               
-    fontWeight: '700',
-  },
-  staffLabelText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    fontWeight: '400',          
-  },
-  dateTimeColumn: {
-    flex: 1.2,
-    flexDirection: "column",
+    alignItems: "stretch",
     gap: 12,
   },
-  dateContainer: {
-    flexDirection: "column",
+  infoColumn: {
+    flex: 1,
+    justifyContent: "space-between",
+    gap: 12,
   },
-  dayNameText: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  clientRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  dateText: {
+  clientAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  clientAvatarPlaceholder: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  clientNameText: {
+    fontSize: 16,
+    fontWeight: "700",
     color: COLORS.text,
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 2,
+    letterSpacing: -0.3,
+  },
+  metaDataGroup: {
+    gap: 6,
   },
   infoMeta: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
+  },
+  dateText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontWeight: "500",
+  },
+  dateLabelHighlight: {
+    color: COLORS.text,
+    fontWeight: "600",
   },
   metaText: {
     color: COLORS.textMuted,
     fontSize: 13,
     fontWeight: "500",
   },
+  sideColumn: {
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    minWidth: 85,
+    gap: 12,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  staffCounterBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  staffCountText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  staffCountTotal: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontWeight: "500",
+  },
   descriptionWrapper: {
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingTop: 12,
-    marginTop: 4,
+    borderTopColor: COLORS.borderLight || COLORS.border,
+    paddingTop: 10,
+    marginTop: 12,
   },
   descriptionText: {
     color: COLORS.textMuted,
-    fontSize: 13,
-    fontStyle: "italic",
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

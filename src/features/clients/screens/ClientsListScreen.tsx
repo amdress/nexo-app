@@ -1,5 +1,5 @@
 // src/features/clients/screens/ClientsListScreen.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -9,16 +9,14 @@ import ScreenLayout from '@/layouts/ScreenLayout';
 import FAB from '@/shared/components/btn/FAB';
 import { clientService } from '../services/clientService';
 import { ClientUI } from '../interfacesUI/clientUI';
-import CreateClientModal from '../components/modals/CreateClientModal';
 
 export default function ClientsListScreen() {
   const { t } = useTranslation();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [styles, COLORS] = useThemedStyles(getStyles);
 
   const [clients, setClients] = useState<ClientUI[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const loadClients = useCallback(async () => {
     try {
@@ -60,14 +58,10 @@ export default function ClientsListScreen() {
     );
   };
 
-  const handleCreated = (newClient: ClientUI) => {
-    setClients((prev) => [...prev, newClient]);
-    setShowCreateModal(false);
-  };
-
   const renderItem = ({ item }: { item: ClientUI }) => (
     <TouchableOpacity
       style={styles.row}
+      onPress={() => navigation.navigate('ClientForm', { clientId: item.id })}
       onLongPress={() => handleDelete(item)}
       activeOpacity={0.7}
     >
@@ -78,7 +72,11 @@ export default function ClientsListScreen() {
           <Ionicons name="business-outline" size={20} color={COLORS.textMuted} />
         </View>
       )}
-      <Text style={styles.name}>{item.name}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.name}>{item.name}</Text>
+        {item.accountLabel ? <Text style={styles.subtitle}>{item.accountLabel}</Text> : null}
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
     </TouchableOpacity>
   );
 
@@ -110,14 +108,8 @@ export default function ClientsListScreen() {
           />
         )}
 
-        <FAB icon="add" onPress={() => setShowCreateModal(true)} />
+        <FAB icon="add" onPress={() => navigation.navigate('ClientForm')} />
       </View>
-
-      <CreateClientModal
-        visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreated={handleCreated}
-      />
     </ScreenLayout>
   );
 }
@@ -146,6 +138,7 @@ const getStyles = (COLORS: any) => StyleSheet.create({
     alignItems: 'center',
   },
   name: { color: COLORS.text, fontSize: 15, fontWeight: '600' },
+  subtitle: { color: COLORS.textMuted, fontSize: 12, marginTop: 1 },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 8 },
   emptyText: { color: COLORS.text, fontSize: 15, fontWeight: '700', marginTop: 8 },
   emptySubtext: { color: COLORS.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },

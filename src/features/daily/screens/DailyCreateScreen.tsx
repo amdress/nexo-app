@@ -38,11 +38,13 @@ export default function DailyCreateScreen({ navigation }: any) {
   };
 
   // El padre ejecuta la lógica de negocio y consume su servicio
+// El padre ejecuta la lógica de negocio y consume su servicio
 const handleFinalSubmit = async () => {
   if (!pendingState) return;
 
   setIsSubmitting(true);
   const payload = {
+    clientId: pendingState.clientId, // <--- Añadimos el clientId que exige el DailyCreateDto
     date: toISODate(pendingState.date),
     startTime: formatTime(toTimeString(pendingState.startTime)),
     endTime: formatTime(toTimeString(pendingState.endTime)),

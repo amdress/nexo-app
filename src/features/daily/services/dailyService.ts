@@ -18,9 +18,9 @@ import * as Crypto from "expo-crypto";
 import { DailyStaffEntity } from "@/database/models/dailyStaff";
 import { StaffUI } from "@/features/staff/interacesUI/staffUI";
 
-/** Traduz uma DailyEntity crua (snake_case, vinda do banco) para o formato de UI */
-function mapDailyEntityToItem(
-  daily: DailyEntity,
+/** Traduz uma DailyEntity crua (snake_case, vinda do banco) incluindo dados do cliente para o formato de UI */
+export function mapDailyEntityToItem(
+  daily: DailyEntity & { client_name?: string | null; client_logo?: string | null },
   confirmedStaffCount: number,
 ): DailyItem {
   return {
@@ -32,6 +32,8 @@ function mapDailyEntityToItem(
     requiredStaffCount: daily.required_staff_count,
     confirmedStaffCount,
     status: daily.status,
+    clientName: daily.client_name || null,  
+    clientLogo: daily.client_logo || null,  
   };
 }
 
@@ -49,6 +51,8 @@ async createDaily(payload: DailyCreateDto): Promise<DailyItem> {
       required_staff_count: payload.requiredStaffCount,
       description: payload.description || null,
       status: "scheduled",
+      client_id: payload.clientId,
+      report_pdf_uri: null,
       created_at: payload.createdAt,
     };
 
@@ -89,15 +93,15 @@ async createDaily(payload: DailyCreateDto): Promise<DailyItem> {
   }
 },
 
-  /**
+/**
    * Busca todas as jornadas que estão ativas (não finalizadas),
-   * junto com a quantidade de funcionários confirmados para cada uma.
+   * junto com a quantidade de funcionários confirmados e dados do cliente.
    */
   async getActiveDailys(): Promise<DailyItem[]> {
     try {
       const dailys = await dailyRepository.findActiveDailys();
       console.log(
-        `[DAILY_SERVICE] Jornadas ativas: ${JSON.stringify(dailys, null, 2)}`,
+        `[DAILY_SERVICE] Jornadas ativas com clientes: ${JSON.stringify(dailys, null, 2)}`,
       );
 
       return dailys.map(({ daily, confirmed_staff_count }) =>
