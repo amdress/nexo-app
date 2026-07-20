@@ -30,6 +30,7 @@ export const clientService = {
   async getAllClients(): Promise<ClientUI[]> {
     try {
       const clients = await clientRepository.findAll();
+      console.log("[Client_Services] Clientes obtenidos")
       return clients.map(mapClientEntityToUI);
     } catch (error: any) {
       console.error("[CLIENT_SERVICE] Erro ao buscar clientes:", error);

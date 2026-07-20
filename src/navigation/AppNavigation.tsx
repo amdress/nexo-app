@@ -15,6 +15,7 @@ import CompanyProfileScreen from "../features/settings/screens/CompanyProfileScr
 import ClientsListScreen from "../features/clients/screens/ClientsListScreen";
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
 import ClientFormScreen from "@/features/clients/components/modals/CreateClientModal";
+import DailyDispatchScreen from "@/features/daily/screens/DailyDispatchScreen";
 
 // Se registran todas las rutas de la app en un solo lugar, para tener un control centralizado y evitar duplicaciones.
 export type RootStackParamList = {
@@ -28,6 +29,7 @@ export type RootStackParamList = {
   CompanyProfile: undefined;
   ClientsList: undefined;
   ClientForm: { clientId?: string };
+  DailyDispatchScreen: { dailyId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -55,6 +57,7 @@ export default function AppNavigation() {
       <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} />
       <Stack.Screen name="ClientsList" component={ClientsListScreen} />
       <Stack.Screen name="ClientForm" component={ClientFormScreen} />
+      <Stack.Screen name="DailyDispatchScreen" component={DailyDispatchScreen} />
     </Stack.Navigator>
   );
 }

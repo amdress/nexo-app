@@ -24,12 +24,18 @@ class DailyStaffRepository
 async findWithStaffById(dailyId: string): Promise<DailyWithStaffDetail | null> {
   const db = await getDatabaseConnection();
 
-  // Obtenemos los datos base de la jornada
-  const shiftQuery = `SELECT * FROM daily WHERE id = ? LIMIT 1;`;
-  const daily = await db.getFirstAsync<DailyEntity>(shiftQuery, [dailyId]);
+  const shiftQuery = `
+    SELECT 
+      d.*,
+      c.name AS client_name,
+      c.logo_uri AS client_logo
+    FROM daily d
+    LEFT JOIN clients c ON c.id = d.client_id
+    WHERE d.id = ? LIMIT 1;
+  `;
+  const daily = await db.getFirstAsync<any>(shiftQuery, [dailyId]);
   if (!daily) return null;
 
-  // Ataca la tabla pivote (daily_staff) y trae los datos del staff relacionado
   const staffQuery = `
     SELECT 
       s.id, s.name, s.role, s.avatar_uri,

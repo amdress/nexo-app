@@ -76,6 +76,7 @@ export const staffService = {
     };
 
     await staffRepository.insert(newStaff);
+    console.log("[Client_Services] Staff created", newStaff)
   },
 
   /** Atualiza os dados de um funcionário existente */
