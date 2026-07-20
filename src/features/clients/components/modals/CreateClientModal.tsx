@@ -1,32 +1,56 @@
-// src/features/clients/components/modals/CreateClientModal.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+// src/features/clients/screens/ClientFormScreen.tsx
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
-import BaseModal from '@/shared/components/modals/BaseModal';
+import ScreenLayout from '@/layouts/ScreenLayout';
 import FormTextInput from '@/shared/components/form/FormTextInput';
 import { clientService } from '../../services/clientService';
-import { ClientUI } from '../../interfacesUI/clientUI';
 import { saveClientLogo } from '@/shared/utils/fileStorage';
 
-interface CreateClientModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onCreated: (client: ClientUI) => void;
-}
+export default function ClientFormScreen() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const clientId: string | undefined = route.params?.clientId;
+  const isEditMode = !!clientId;
 
-export default function CreateClientModal({ visible, onClose, onCreated }: CreateClientModalProps) {
   const [styles, COLORS] = useThemedStyles(getStyles);
+
   const [name, setName] = useState('');
   const [logoUri, setLogoUri] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accountLabel, setAccountLabel] = useState('');
+  const [site, setSite] = useState('');
+  const [address, setAddress] = useState('');
+  const [cityState, setCityState] = useState('');
 
-  const resetAndClose = () => {
-    setName('');
-    setLogoUri(null);
-    onClose();
-  };
+  const [loading, setLoading] = useState(isEditMode);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    async function loadClient() {
+      try {
+        const clients = await clientService.getAllClients();
+        const existing = clients.find((c) => c.id === clientId);
+        if (existing) {
+          setName(existing.name);
+          setLogoUri(existing.logoUri);
+          setAccountLabel(existing.accountLabel || '');
+          setSite(existing.site || '');
+          setAddress(existing.address || '');
+          setCityState(existing.cityState || '');
+        }
+      } catch (error: any) {
+        Alert.alert('Erro', error?.message || 'Não foi possível carregar a empresa.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadClient();
+  }, [clientId, isEditMode]);
 
   const handlePickLogo = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -47,94 +71,150 @@ export default function CreateClientModal({ visible, onClose, onCreated }: Creat
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
       Alert.alert('Nome obrigatório', 'Informe o nome da empresa contratante.');
       return;
     }
 
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
-      let persistedLogoUri: string | null = null;
-      if (logoUri) {
+      let persistedLogoUri = logoUri;
+
+      // Só copia para o filesystem se for uma URI temporária nova (começa com file:// de cache)
+      const isNewLocalUri = logoUri && !logoUri.includes('/clients/');
+      if (logoUri && isNewLocalUri) {
         persistedLogoUri = await saveClientLogo(trimmedName, logoUri);
       }
 
-      const newClient = await clientService.createClient(trimmedName, persistedLogoUri);
-      onCreated(newClient);
-      resetAndClose();
+      const formData = {
+        name: trimmedName,
+        logoUri: persistedLogoUri,
+        accountLabel: accountLabel.trim(),
+        site: site.trim(),
+        address: address.trim(),
+        cityState: cityState.trim(),
+      };
+
+      if (isEditMode) {
+        await clientService.updateClient(clientId!, formData);
+      } else {
+        await clientService.createClient(formData);
+      }
+
+      navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Erro', error?.message || 'Não foi possível criar a empresa.');
+      Alert.alert('Erro', error?.message || 'Não foi possível salvar a empresa.');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <ScreenLayout title="Empresa Contratante" onBackPress={() => navigation.goBack()}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   return (
-    <BaseModal visible={visible} onClose={resetAndClose} dismissible={!isSubmitting}>
-      <Text style={styles.title}>Nova Empresa Contratante</Text>
-      <Text style={styles.subtitle}>Ex: Mercado Livre, DHL, TSI...</Text>
-
-      <TouchableOpacity style={styles.logoPicker} onPress={handlePickLogo} activeOpacity={0.7}>
-        {logoUri ? (
-          <Image source={{ uri: logoUri }} style={styles.logoImage} />
-        ) : (
-          <View style={styles.logoPlaceholder}>
-            <Ionicons name="image-outline" size={28} color={COLORS.textMuted} />
-            <Text style={styles.logoPlaceholderText}>Logo (opcional)</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-
-      <FormTextInput
-        label="Nome da Empresa"
-        placeholder="Ex: Mercado Livre"
-        value={name}
-        onChangeText={setName}
-      />
-
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={resetAndClose} disabled={isSubmitting}>
-          <Text style={styles.cancelBtnText}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.confirmBtn, isSubmitting && { opacity: 0.7 }]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator size="small" color={COLORS.textDark} />
+    <ScreenLayout
+      title={isEditMode ? 'Editar Empresa' : 'Nova Empresa'}
+      onBackPress={() => navigation.goBack()}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        <TouchableOpacity style={styles.logoPicker} onPress={handlePickLogo} activeOpacity={0.7}>
+          {logoUri ? (
+            <Image source={{ uri: logoUri }} style={styles.logoImage} />
           ) : (
-            <Text style={styles.confirmBtnText}>Criar</Text>
+            <View style={styles.logoPlaceholder}>
+              <Ionicons name="image-outline" size={28} color={COLORS.textMuted} />
+              <Text style={styles.logoPlaceholderText}>Logo (opcional)</Text>
+            </View>
           )}
         </TouchableOpacity>
-      </View>
-    </BaseModal>
+
+        <FormTextInput
+          label="Nome da Empresa"
+          placeholder="Ex: DHL"
+          value={name}
+          onChangeText={setName}
+        />
+
+        <FormTextInput
+          label="Conta / Referência"
+          placeholder="Ex: MELI - DHL"
+          value={accountLabel}
+          onChangeText={setAccountLabel}
+        />
+
+        <FormTextInput
+          label="Site / Unidade"
+          placeholder="Ex: CURITIBA - SVC"
+          value={site}
+          onChangeText={setSite}
+        />
+
+        <FormTextInput
+          label="Endereço"
+          placeholder="Ex: RUA SÃO BENTO 2143"
+          value={address}
+          onChangeText={setAddress}
+        />
+
+        <FormTextInput
+          label="Cidade / UF"
+          placeholder="Ex: CURITIBA"
+          value={cityState}
+          onChangeText={setCityState}
+        />
+
+        <TouchableOpacity
+          style={[styles.saveBtn, isSaving && { opacity: 0.7 }]}
+          onPress={handleSave}
+          disabled={isSaving}
+          activeOpacity={0.8}
+        >
+          {isSaving ? (
+            <ActivityIndicator size="small" color={COLORS.textDark} />
+          ) : (
+            <Text style={styles.saveBtnText}>{isEditMode ? 'Salvar Alterações' : 'Criar Empresa'}</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </ScreenLayout>
   );
 }
 
 const getStyles = (COLORS: any) => StyleSheet.create({
-  title: { fontSize: 16, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
-  subtitle: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center', marginTop: 2, marginBottom: 16 },
-  logoPicker: { alignSelf: 'center', marginBottom: 16 },
-  logoImage: { width: 80, height: 80, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  content: { padding: 20, gap: 16 },
+  logoPicker: { alignSelf: 'center', marginBottom: 4 },
+  logoImage: { width: 90, height: 90, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border },
   logoPlaceholder: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 12,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
-  logoPlaceholderText: { color: COLORS.textMuted, fontSize: 9, textAlign: 'center' },
-  actions: { flexDirection: 'row', gap: 12, marginTop: 20 },
-  cancelBtn: { flex: 1, borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
-  cancelBtnText: { color: COLORS.textMuted, fontWeight: '600', fontSize: 14 },
-  confirmBtn: { flex: 1, backgroundColor: COLORS.primary, borderRadius: 8, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
-  confirmBtnText: { color: COLORS.textDark, fontWeight: '700', fontSize: 14 },
+  logoPlaceholderText: { color: COLORS.textMuted, fontSize: 10, textAlign: 'center' },
+  saveBtn: {
+    backgroundColor: COLORS.primary,
+    height: 48,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  saveBtnText: { color: COLORS.textDark, fontWeight: '700', fontSize: 15 },
 });

@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'expo-sqlite';
+import { SQLiteDatabase } from "expo-sqlite";
 
 export async function up(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
@@ -20,6 +20,10 @@ export async function up(db: SQLiteDatabase): Promise<void> {
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
       logo_uri TEXT,
+      account_label TEXT,
+      site TEXT,
+      address TEXT,
+      city_state TEXT,
       created_at TEXT NOT NULL
     );
 
@@ -33,6 +37,7 @@ export async function up(db: SQLiteDatabase): Promise<void> {
       description TEXT,
       status TEXT NOT NULL DEFAULT 'scheduled', -- 'scheduled', 'in_progress', 'completed'
       client_id TEXT,
+      report_pdf_uri TEXT,
       created_at TEXT NOT NULL,
       FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE SET NULL
     ); 

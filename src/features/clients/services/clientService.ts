@@ -9,7 +9,20 @@ function mapClientEntityToUI(item: ClientEntity): ClientUI {
     id: item.id,
     name: item.name,
     logoUri: item.logo_uri,
+    accountLabel: item.account_label,
+    site: item.site,
+    address: item.address,
+    cityState: item.city_state,
   };
+}
+
+export interface ClientFormData {
+  name: string;
+  logoUri?: string | null;
+  accountLabel?: string | null;
+  site?: string | null;
+  address?: string | null;
+  cityState?: string | null;
 }
 
 export const clientService = {
@@ -17,6 +30,7 @@ export const clientService = {
   async getAllClients(): Promise<ClientUI[]> {
     try {
       const clients = await clientRepository.findAll();
+      console.log("[Client_Services] Clientes obtenidos")
       return clients.map(mapClientEntityToUI);
     } catch (error: any) {
       console.error("[CLIENT_SERVICE] Erro ao buscar clientes:", error);
@@ -25,9 +39,9 @@ export const clientService = {
   },
 
   /** Cria uma nova empresa contratante */
-  async createClient(name: string, logoUri: string | null = null): Promise<ClientUI> {
+  async createClient(data: ClientFormData): Promise<ClientUI> {
     try {
-      const trimmedName = name.trim();
+      const trimmedName = data.name.trim();
       if (!trimmedName) {
         throw new Error("O nome da empresa é obrigatório.");
       }
@@ -35,7 +49,11 @@ export const clientService = {
       const newClient: ClientEntity = {
         id: Crypto.randomUUID(),
         name: trimmedName,
-        logo_uri: logoUri,
+        logo_uri: data.logoUri || null,
+        account_label: data.accountLabel?.trim() || null,
+        site: data.site?.trim() || null,
+        address: data.address?.trim() || null,
+        city_state: data.cityState?.trim() || null,
         created_at: new Date().toISOString(),
       };
 
@@ -46,6 +64,26 @@ export const clientService = {
     } catch (error: any) {
       console.error("[CLIENT_SERVICE] Erro ao criar empresa:", error);
       throw new Error(error?.message || "Não foi possível criar a empresa.");
+    }
+  },
+
+  /** Atualiza os dados de uma empresa contratante */
+  async updateClient(id: string, data: Partial<ClientFormData>): Promise<void> {
+    try {
+      const updatedData: Partial<ClientEntity> = {};
+
+      if (data.name !== undefined) updatedData.name = data.name.trim();
+      if (data.logoUri !== undefined) updatedData.logo_uri = data.logoUri;
+      if (data.accountLabel !== undefined) updatedData.account_label = data.accountLabel?.trim() || null;
+      if (data.site !== undefined) updatedData.site = data.site?.trim() || null;
+      if (data.address !== undefined) updatedData.address = data.address?.trim() || null;
+      if (data.cityState !== undefined) updatedData.city_state = data.cityState?.trim() || null;
+
+      await clientRepository.update(id, updatedData);
+      console.log("[CLIENT_SERVICE] Empresa atualizada:", id);
+    } catch (error: any) {
+      console.error("[CLIENT_SERVICE] Erro ao atualizar empresa:", error);
+      throw new Error(error?.message || "Não foi possível atualizar a empresa.");
     }
   },
 

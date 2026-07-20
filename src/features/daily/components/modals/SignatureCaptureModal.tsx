@@ -71,6 +71,7 @@ export default function StaffSignatureCaptureModal({
       });
       setPhotoUri(photo.uri);
       setStep('captured');
+      console.log('foto capturada ')
       setTimeout(() => setStep('signature'), 900);
     } catch (error) {
       Alert.alert('Erro na Câmera', 'Não foi possível capturar a foto. Tente novamente.');

@@ -15,15 +15,18 @@ class DailyRepository
 
 /**
    * Obtiene únicamente las jornadas ACTIVAS (no completadas),
-   * junto con la cantidad de funcionarios confirmados para asistir.
+   * junto con la cantidad de funcionarios confirmados para assistir,
+   * acrescido do nome e logo do cliente contratante.
    */
   async findActiveDailys(): Promise<DailyAndCounterStaff[]> {
     const db = await getDatabaseConnection();
     
-    // Usamos una subconsulta que va directo a contar a la tabla daily_staff
+    // Mantemos sua estrutura intacta e APENAS acrescentamos o LEFT JOIN e os campos do cliente
     const query = `
       SELECT 
         ds.*, 
+        c.name as client_name,
+        c.logo_uri as client_logo,
         (
           SELECT COUNT(*) 
           FROM daily_staff dss 
@@ -31,6 +34,7 @@ class DailyRepository
             AND dss.status IN ('confirmed', 'present')
         ) as confirmed_staff_count
       FROM daily ds
+      LEFT JOIN clients c ON ds.client_id = c.id
       WHERE ds.status IN ('scheduled', 'in_progress');
     `;
 
@@ -39,14 +43,19 @@ class DailyRepository
 
     // 2. Mapeamos hacia la interfaz estandarizada combinada
     return rows.map((row) => {
-      const { confirmed_staff_count, ...dailyFields } = row;
+      // Acrescentamos client_name e client_logo na desestruturação sem quebrar o resto
+      const { confirmed_staff_count, client_name, client_logo, ...dailyFields } = row;
+      
       return {
-        daily: dailyFields as DailyEntity,
+        daily: {
+          ...dailyFields,
+          client_name: client_name || null,
+          client_logo: client_logo || null,
+        } as DailyEntity & { client_name: string | null; client_logo: string | null; },
         confirmed_staff_count: confirmed_staff_count || 0,
       };
     });
   }
-
   
 }
 

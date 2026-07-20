@@ -13,22 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Faz o checkout do código do repositório para a máquina virtual
+      # 1. Faz o checkout do código do repositório
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configura o ambiente Node.js na máquina virtual
+      # 2. Configura o ambiente Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-size: '20' # Versão estável do Node
-          cache: 'npm'    # Ativa cache automático para acelerar instalações futuras
+          node-version: '20'
+          cache: 'npm'
 
-      # 3. Instala as dependências do projeto de forma limpa
+      # 3. Instala as dependências de forma limpa
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       # 4. Executa a validação de tipos do TypeScript
-      # Usamos --noEmit para compilar e validar os tipos sem gerar os arquivos .js físicos
       - name: TypeScript Type-Check
         run: npx tsc --noEmit
+
+      # 5. Executa todos os testes automatizados com Jest (Agregado ✅)
+      - name: Run Jest Tests
+        run: npm run test -- --passWithNoTests

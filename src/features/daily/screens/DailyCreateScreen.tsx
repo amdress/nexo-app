@@ -10,6 +10,7 @@ import DailyCreateConfirmModal from '../components/modals/DailyCreateConfirmModa
 
 import DailyStepOne from '../components/forms/create/DailyStepOne';
 import DailyStepTwo from '../components/forms/create/DailyStepTwo';
+import DailyStepZero from '../components/forms/create/DailyStepZero'
 
 export default function DailyCreateScreen({ navigation }: any) {
   const { showToast } = useToast();
@@ -18,6 +19,7 @@ export default function DailyCreateScreen({ navigation }: any) {
   const [pendingState, setPendingState] = useState<any>(null);
 
   const wizardSteps: StepItem[] = [
+    { component: DailyStepZero },
     { component: DailyStepOne },
     { component: DailyStepTwo },
   ];
@@ -38,11 +40,13 @@ export default function DailyCreateScreen({ navigation }: any) {
   };
 
   // El padre ejecuta la lógica de negocio y consume su servicio
+// El padre ejecuta la lógica de negocio y consume su servicio
 const handleFinalSubmit = async () => {
   if (!pendingState) return;
 
   setIsSubmitting(true);
   const payload = {
+    clientId: pendingState.clientId, 
     date: toISODate(pendingState.date),
     startTime: formatTime(toTimeString(pendingState.startTime)),
     endTime: formatTime(toTimeString(pendingState.endTime)),
