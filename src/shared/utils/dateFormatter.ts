@@ -5,7 +5,7 @@ const DEFAULT_LOCALE = 'pt-BR';
 const parseISODate = (dateString: string): Date =>
   new Date(`${dateString}T00:00:00`);
 
-const parseTimeString = (timeString: string): Date => {
+export const parseTimeString = (timeString: string): Date => {
   const [hours, minutes] = timeString.split(':').map(Number);
   const date = new Date();
   date.setHours(hours, minutes, 0, 0);

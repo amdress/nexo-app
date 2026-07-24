@@ -1,10 +1,10 @@
+
 export interface DailyCreateDto {
   clientId: string;
+  shiftId: string;
   date: string;
-  startTime: string;
-  endTime: string;
   requiredStaffCount: number;
   selectedStaffIds: string[];
-  description: string;
+  observations?: string;
   createdAt: string;
 }

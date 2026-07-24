@@ -1,15 +1,26 @@
 export interface DailyItem {
   id: string;
-  dateLabel: string;
-  dayName: string;
-  timeRange: string;
-  description: string;
+  clientId: string;
+  shiftId?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
   requiredStaffCount: number;
-  confirmedStaffCount: number;
-  status: 'scheduled' | 'in_progress' | 'completed';
-  clientName: string | null;  
-  clientLogo: string | null;  
+  selectedStaffIds: string[];
+  description?: string;
+  createdAt?: string;
+
+  // Agregar estas propiedades para la UI:
+  status?: "scheduled" | "in_progress" | "completed" | "canceled";
+  clientName?: string;
+  clientLogo?: string | null;
+  dayName?: string;
+  dateLabel?: string;
+  timeRange?: string;
+  confirmedStaffCount?: number;
 }
+
+
 
 export interface StaffAttendance {
   id: string;

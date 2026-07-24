@@ -58,27 +58,36 @@ export default function ClientsListScreen() {
     );
   };
 
-  const renderItem = ({ item }: { item: ClientUI }) => (
-    <TouchableOpacity
-      style={styles.row}
-      onPress={() => navigation.navigate('ClientForm', { clientId: item.id })}
-      onLongPress={() => handleDelete(item)}
-      activeOpacity={0.7}
-    >
-      {item.logoUri ? (
-        <Image source={{ uri: item.logoUri }} style={styles.logo} />
-      ) : (
-        <View style={styles.logoPlaceholder}>
-          <Ionicons name="business-outline" size={20} color={COLORS.textMuted} />
+  const renderItem = ({ item }: { item: ClientUI }) => {
+    const shiftCount = item.shifts?.length || 0;
+
+    return (
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => navigation.navigate('ClientProfile', { clientId: item.id })}
+        onLongPress={() => handleDelete(item)}
+        activeOpacity={0.7}
+      >
+        {item.logoUri ? (
+          <Image source={{ uri: item.logoUri }} style={styles.logo} />
+        ) : (
+          <View style={styles.logoPlaceholder}>
+            <Ionicons name="business-outline" size={20} color={COLORS.textMuted} />
+          </View>
+        )}
+
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>{item.name}</Text>
+          {item.accountLabel ? <Text style={styles.subtitle}>{item.accountLabel}</Text> : null}
+          <Text style={styles.shiftsBadge}>
+            {shiftCount === 1 ? '1 turno cadastrado' : `${shiftCount} turnos cadastrados`}
+          </Text>
         </View>
-      )}
-      <View style={{ flex: 1 }}>
-        <Text style={styles.name}>{item.name}</Text>
-        {item.accountLabel ? <Text style={styles.subtitle}>{item.accountLabel}</Text> : null}
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-    </TouchableOpacity>
-  );
+
+        <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <ScreenLayout
@@ -108,38 +117,40 @@ export default function ClientsListScreen() {
           />
         )}
 
-        <FAB icon="add" onPress={() => navigation.navigate('ClientForm')} />
+        <FAB icon="add" onPress={() => navigation.navigate('ClientCreate')} />
       </View>
     </ScreenLayout>
   );
 }
 
-const getStyles = (COLORS: any) => StyleSheet.create({
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  listContent: { padding: 16 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
-  },
-  logo: { width: 40, height: 40, borderRadius: 8 },
-  logoPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  name: { color: COLORS.text, fontSize: 15, fontWeight: '600' },
-  subtitle: { color: COLORS.textMuted, fontSize: 12, marginTop: 1 },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 8 },
-  emptyText: { color: COLORS.text, fontSize: 15, fontWeight: '700', marginTop: 8 },
-  emptySubtext: { color: COLORS.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
-});
+const getStyles = (COLORS: any) =>
+  StyleSheet.create({
+    centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    listContent: { padding: 16 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: COLORS.surface,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 10,
+    },
+    logo: { width: 40, height: 40, borderRadius: 8 },
+    logoPlaceholder: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: COLORS.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    name: { color: COLORS.text, fontSize: 15, fontWeight: '600' },
+    subtitle: { color: COLORS.textMuted, fontSize: 12, marginTop: 1 },
+    shiftsBadge: { color: COLORS.primary || '#2563EB', fontSize: 11, fontWeight: '500', marginTop: 4 },
+    emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 8 },
+    emptyText: { color: COLORS.text, fontSize: 15, fontWeight: '700', marginTop: 8 },
+    emptySubtext: { color: COLORS.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
+  });

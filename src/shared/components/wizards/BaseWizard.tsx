@@ -115,7 +115,7 @@ const getStyles = (COLORS: any) => StyleSheet.create({
   segmentActive: { backgroundColor: COLORS.primary },
   segmentInactive: { backgroundColor: COLORS.border },
   stepContainer: { flex: 1, width: '100%' },
-  footerActions: { flexDirection: 'row', gap: 12, padding: 12, borderTopWidth: 1, borderTopColor: COLORS.border, backgroundColor: COLORS.surface, alignItems: 'center', marginBottom: 2 },
+  footerActions: { flexDirection: 'row', gap: 12, padding: 5, borderTopWidth: 1, borderTopColor: COLORS.border, backgroundColor: COLORS.surface, alignItems: 'center', marginBottom: 2 },
   backBtn: { flex: 1, borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   backBtnText: { color: COLORS.textMuted, fontSize: 15, fontWeight: '700' },
   nextBtn: { flex: 2, backgroundColor: COLORS.primary, borderRadius: 8, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },

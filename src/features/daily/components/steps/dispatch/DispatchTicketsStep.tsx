@@ -13,8 +13,8 @@ import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
 import { WizardStepChildProps } from "@/shared/components/wizards/interfaces/wizard";
-import { DailyWithStaffUI, StaffAttendance } from "../interfacesUI/daily";
-import IndividualReceiptCard from "../components/receipts/IndividualReceiptCard";
+import { DailyWithStaffUI, StaffAttendance } from "../../../interfacesUI/daily";
+import IndividualReceiptCard from "../../receipts/IndividualReceiptCard";
 
 export default function DispatchTicketsStep({
   state,
@@ -115,15 +115,22 @@ export default function DispatchTicketsStep({
           </View>
 
           <TouchableOpacity
-            style={styles.shareFab}
+            style={styles.shareBtn}
             onPress={() => handleShareTicket(staff.id)}
             disabled={sharingStaffId === staff.id}
             activeOpacity={0.8}
           >
             {sharingStaffId === staff.id ? (
-              <ActivityIndicator size="small" color="#FFF" />
+              <ActivityIndicator size="small" color={COLORS.textDark} />
             ) : (
-              <Ionicons name="logo-whatsapp" size={24} color="#FFF" />
+              <>
+                <Ionicons
+                  name="share-social-outline"
+                  size={18}
+                  color={COLORS.textDark}
+                />
+                <Text style={styles.shareBtnText}>Enviar por WhatsApp</Text>
+              </>
             )}
           </TouchableOpacity>
         </View>
@@ -146,32 +153,23 @@ const getStyles = (COLORS: any) =>
       alignItems: "center",
       padding: 24,
     },
-    content: { padding: 16, alignItems: "center", gap: 32, paddingBottom: 40 },
+    content: { padding: 16, alignItems: "center", gap: 24, paddingBottom: 40 },
     sectionTitle: {
       color: COLORS.textMuted,
       fontSize: 13,
       fontWeight: "600",
       alignSelf: "flex-start",
     },
-    // position: relative no wrapper permite que o FAB flutue ancorado à borda do card,
-    // em vez de empurrar um botão largo para baixo dele.
-    ticketWrapper: { position: "relative" },
-    shareFab: {
-      position: "absolute",
-      top: "50%",
-      right: -18,
-      marginTop: -22,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: "#25D366",
-      justifyContent: "center",
+    ticketWrapper: { alignItems: "center", gap: 12 },
+    shareBtn: {
+      flexDirection: "row",
       alignItems: "center",
-      elevation: 4,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
+      gap: 8,
+      backgroundColor: "#25D366",
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 10,
     },
+    shareBtnText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
     emptyText: { color: COLORS.textMuted, fontSize: 14, textAlign: "center" },
   });

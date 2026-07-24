@@ -13,30 +13,50 @@ import {
   getDayName,
   formatTimeRange,
 } from "../../../shared/utils/dateFormatter";
+import { clientService } from "@/features/clients/services/clientService";
 
 import * as Crypto from "expo-crypto";
 import { DailyStaffEntity } from "@/database/models/dailyStaff";
 import { StaffUI } from "@/features/staff/interacesUI/staffUI";
+import { ClientShiftEntity } from "@/database/models/clientShitf";
 
-/** Traduz uma DailyEntity crua (snake_case, vinda do banco) incluindo dados do cliente para o formato de UI */
+/** Traduz uma DailyEntity crua (snake_case, vinda do banco) incluindo dados do cliente e do turno para o formato de UI */
 export function mapDailyEntityToItem(
   daily: DailyEntity & {
     client_name?: string | null;
     client_logo?: string | null;
+    shift?: Pick<
+      ClientShiftEntity,
+      "name" | "start_time" | "end_time" | "break_duration" | "demand_info"
+    > | null;
   },
   confirmedStaffCount: number,
 ): DailyItem {
+  const startTime = daily.shift?.start_time || "";
+  const endTime = daily.shift?.end_time || "";
+
   return {
     id: daily.id,
+    clientId: daily.client_id,
+    shiftId: daily.shift_id || undefined,
+    date: daily.date,
+    startTime,
+    endTime,
+    requiredStaffCount: daily.required_staff_count,
+    selectedStaffIds: [], // Se completa si hay miembros asignados
+    description: daily.observations || "",
+    createdAt: daily.created_at,
+
+    // Propiedades presentacionales para la UI
+    status: daily.status,
     dateLabel: daily.date,
     dayName: getDayName(daily.date),
-    timeRange: formatTimeRange(daily.start_time, daily.end_time),
-    description: daily.description || "",
-    requiredStaffCount: daily.required_staff_count,
+    timeRange: daily.shift
+      ? formatTimeRange(startTime, endTime)
+      : "",
+    clientName: daily.client_name || undefined,
+    clientLogo: daily.client_logo || undefined,
     confirmedStaffCount,
-    status: daily.status,
-    clientName: daily.client_name || null,
-    clientLogo: daily.client_logo || null,
   };
 }
 
@@ -46,15 +66,21 @@ export const dailyService = {
     try {
       const newDailyId = Crypto.randomUUID();
 
+      // Até existir login (ver PENDÊNCIA de auth), o líder vem de uma
+      // config única em company.leader_name. Se ainda não foi configurado
+      // no onboarding, fica null aqui — não bloqueamos a criação da jornada
+      // por isso (decisão a confirmar: bloquear com Error é uma alternativa).
+      const leaderName = "Líder";
+
       const dailyEntity: DailyEntity = {
         id: newDailyId,
         date: payload.date,
-        start_time: payload.startTime,
-        end_time: payload.endTime,
-        required_staff_count: payload.requiredStaffCount,
-        description: payload.description || null,
         status: "scheduled",
         client_id: payload.clientId,
+        shift_id: payload.shiftId,
+        required_staff_count: payload.requiredStaffCount,
+        leader_name: leaderName, // <-- Usamos a constante local
+        observations: payload.observations || null,
         report_pdf_uri: null,
         created_at: payload.createdAt,
       };
