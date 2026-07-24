@@ -120,7 +120,7 @@ export default function DailyStepTwo({ state, updateState, onValidate }: WizardS
       {/* {isListEmpty && ( */}
         <FAB 
           icon="add" 
-          onPress={() => navigation.navigate('ClientForm')} 
+          onPress={() => navigation.navigate('ClientCreate')} 
         />
       {/* )} */}
     </View>

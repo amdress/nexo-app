@@ -23,6 +23,9 @@ export interface DailyWithStaffDetail {
   }>;
 }
 
+
+
+
 // 6. 
 export interface UpdateAttendanceInput {
   status?: DailyStaffEntity['status'];

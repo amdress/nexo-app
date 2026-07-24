@@ -14,22 +14,33 @@ import GeneralPreferencesScreen from "../features/settings/screens/GeneralPrefer
 import CompanyProfileScreen from "../features/settings/screens/CompanyProfileScreen";
 import ClientsListScreen from "../features/clients/screens/ClientsListScreen";
 import { useThemedStyles } from "@/shared/hooks/useThemedStyles";
-import ClientFormScreen from "@/features/clients/components/modals/CreateClientModal";
+import ClientCreateScreen from "@/features/clients/screens/ClientCreateScreen";
 import DailyDispatchScreen from "@/features/daily/screens/DailyDispatchScreen";
+import ClientProfileScreen from "@/features/clients/screens/ClientProfileScreen"
 
 // Se registran todas las rutas de la app en un solo lugar, para tener un control centralizado y evitar duplicaciones.
 export type RootStackParamList = {
   MainTabs: undefined;
+  // Daily
   DailyControl: { dailyId: string };
   DailyCreate: undefined;
   DailySummary: undefined;
+  DailyDispatchScreen: { dailyId: string };
+
+  //Staff
   StaffCreate: undefined;
   StaffProfile: { staffId: string };
+
+  //Settings
   GeneralPreferences: undefined;
+
+  //company
   CompanyProfile: undefined;
+
+  //Clients
+  ClientCreate: undefined;
   ClientsList: undefined;
-  ClientForm: { clientId?: string };
-  DailyDispatchScreen: { dailyId: string };
+  ClientProfile: { clientId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,7 +67,9 @@ export default function AppNavigation() {
       <Stack.Screen name="GeneralPreferences" component={GeneralPreferencesScreen} />
       <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} />
       <Stack.Screen name="ClientsList" component={ClientsListScreen} />
-      <Stack.Screen name="ClientForm" component={ClientFormScreen} />
+      <Stack.Screen name="ClientCreate" component={ClientCreateScreen} />
+      <Stack.Screen name="ClientProfile" component={ClientProfileScreen} />
+
       <Stack.Screen name="DailyDispatchScreen" component={DailyDispatchScreen} />
     </Stack.Navigator>
   );

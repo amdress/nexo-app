@@ -3,13 +3,16 @@ export interface DailyItem {
   dateLabel: string;
   dayName: string;
   timeRange: string;
-  description: string;
+  shiftName: string | null;
+  observations: string;
   requiredStaffCount: number;
   confirmedStaffCount: number;
   status: 'scheduled' | 'in_progress' | 'completed';
-  clientName: string | null;  
-  clientLogo: string | null;  
+  clientName: string | null;
+  clientLogo: string | null;
 }
+
+
 
 export interface StaffAttendance {
   id: string;

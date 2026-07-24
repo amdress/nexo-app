@@ -1,4 +1,7 @@
-// src/database/models/client.ts
+/**
+ * Entity — espelha 1:1 a tabela `clients` (SQLite).
+ * Empresa contratante (ex: DHL, Mercado Livre).
+ */
 export interface ClientEntity {
   id: string;
   name: string;

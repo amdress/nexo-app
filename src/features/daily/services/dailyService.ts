@@ -17,12 +17,17 @@ import {
 import * as Crypto from "expo-crypto";
 import { DailyStaffEntity } from "@/database/models/dailyStaff";
 import { StaffUI } from "@/features/staff/interacesUI/staffUI";
+import { ClientShiftEntity } from "@/database/models/clientShitf";
 
-/** Traduz uma DailyEntity crua (snake_case, vinda do banco) incluindo dados do cliente para o formato de UI */
+/** Traduz uma DailyEntity crua (snake_case, vinda do banco) incluindo dados do cliente e do turno para o formato de UI */
 export function mapDailyEntityToItem(
   daily: DailyEntity & {
     client_name?: string | null;
     client_logo?: string | null;
+    shift?: Pick<
+      ClientShiftEntity,
+      "name" | "start_time" | "end_time" | "break_duration" | "demand_info"
+    > | null;
   },
   confirmedStaffCount: number,
 ): DailyItem {
@@ -30,8 +35,15 @@ export function mapDailyEntityToItem(
     id: daily.id,
     dateLabel: daily.date,
     dayName: getDayName(daily.date),
-    timeRange: formatTimeRange(daily.start_time, daily.end_time),
-    description: daily.description || "",
+    // Antes vinha de daily.start_time/end_time (campos livres).
+    // Agora vem do turno vinculado via shift_id.
+    timeRange: daily.shift
+      ? formatTimeRange(daily.shift.start_time, daily.shift.end_time)
+      : "",
+    shiftName: daily.shift?.name || null,
+    // Antes era daily.description. O campo livre não existe mais no schema;
+    // observations é o que sobrou (preenchido normalmente no fechamento, não na criação).
+    observations: daily.observations || "",
     requiredStaffCount: daily.required_staff_count,
     confirmedStaffCount,
     status: daily.status,
@@ -46,15 +58,21 @@ export const dailyService = {
     try {
       const newDailyId = Crypto.randomUUID();
 
+      // Até existir login (ver PENDÊNCIA de auth), o líder vem de uma
+      // config única em company.leader_name. Se ainda não foi configurado
+      // no onboarding, fica null aqui — não bloqueamos a criação da jornada
+      // por isso (decisão a confirmar: bloquear com Error é uma alternativa).
+      const company = await companyService.getCompany();
+
       const dailyEntity: DailyEntity = {
         id: newDailyId,
         date: payload.date,
-        start_time: payload.startTime,
-        end_time: payload.endTime,
-        required_staff_count: payload.requiredStaffCount,
-        description: payload.description || null,
         status: "scheduled",
         client_id: payload.clientId,
+        shift_id: payload.shiftId,
+        required_staff_count: payload.requiredStaffCount,
+        leader_name: company.leader_name,
+        observations: payload.observations || null,
         report_pdf_uri: null,
         created_at: payload.createdAt,
       };
@@ -125,6 +143,8 @@ export const dailyService = {
     }
   },
 
+
+  
   /** Busca os funcionários ativos disponíveis para alocação */
   async getStaffList(): Promise<StaffUI[]> {
     try {

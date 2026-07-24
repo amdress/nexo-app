@@ -1,11 +1,11 @@
 // src/features/daily/screens/DailyCreateScreen.tsx
 import React, { useState } from 'react';
-import ScreenLayout from '../../../layouts/ScreenLayout';
-import BaseWizard from '../../../shared/components/wizards/BaseWizard';
-import { StepItem } from '../../../shared/components/wizards/interfaces/wizard';
+import ScreenLayout from '@/layouts/ScreenLayout';
+import BaseWizard from '@/shared/components/wizards/BaseWizard';
+import { StepItem } from '@/shared/components/wizards/interfaces/wizard';
 import { dailyService } from '../services/dailyService';
-import { useToast } from '../../../shared/context/ToastContext';
-import { toISODate, toTimeString, formatTime } from '../../../shared/utils/dateFormatter';
+import { useToast } from '@/shared/context/ToastContext';
+import { toISODate, toTimeString, formatTime } from '@/shared/utils/dateFormatter';
 import DailyCreateConfirmModal from '../components/modals/DailyCreateConfirmModal';
 
 import DailyStepOne from '../components/forms/create/DailyStepOne';

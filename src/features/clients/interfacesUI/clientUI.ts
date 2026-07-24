@@ -1,4 +1,16 @@
-// src/features/clients/interacesUI/clientUI.ts
+// src/features/clients/interfacesUI/clientUI.ts
+
+export interface ClientShiftUI {
+  id: string;
+  clientId: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  breakDuration: string;
+  demandInfo: string;
+  defaultStaffCount: number;
+}
+
 export interface ClientUI {
   id: string;
   name: string;
@@ -7,4 +19,5 @@ export interface ClientUI {
   site: string | null;
   address: string | null;
   cityState: string | null;
+  shifts?: ClientShiftUI[];
 }
