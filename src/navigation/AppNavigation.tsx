@@ -70,7 +70,17 @@ export default function AppNavigation() {
       <Stack.Screen name="ClientCreate" component={ClientCreateScreen} />
       <Stack.Screen name="ClientProfile" component={ClientProfileScreen} />
 
-      <Stack.Screen name="DailyDispatchScreen" component={DailyDispatchScreen} />
+    <Stack.Screen 
+  name="DailyDispatchScreen" 
+  component={(props: any) => (
+    <DailyDispatchScreen 
+      {...props} 
+      state={{} as any} 
+      updateState={() => {}} 
+      onValidate={async () => true} 
+    />
+  )} 
+/>
     </Stack.Navigator>
   );
 }

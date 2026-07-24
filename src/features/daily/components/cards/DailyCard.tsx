@@ -15,7 +15,7 @@ export default function DailyCard({ daily, onPress }: DailyCardProps) {
   const [styles, COLORS] = useThemedStyles(getStyles);
 
   const badge = useMemo(() => {
-    return getStatusBadgeStyles(daily.status, COLORS);
+    return getStatusBadgeStyles(daily.status || "scheduled", COLORS);
   }, [daily.status, COLORS]);
 
   return (
